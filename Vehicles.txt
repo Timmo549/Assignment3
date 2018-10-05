@@ -1,0 +1,7 @@
+6
+Bus:0:LLLDDD:3:2:
+Motorbike:0:LLDDLL:1:1:
+Red car:1:LDLLDL:1:1:
+Elephant:1:LD:2:5:
+Taxi:0:LDDL:0:2:
+Emergency:0:LLDD:3:0:
