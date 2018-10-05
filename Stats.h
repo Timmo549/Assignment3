@@ -6,17 +6,18 @@
 using namespace std;
 
 struct Stats {
-	static int numVehicleTypes;
-	static int roadLength;
-	static int speedLimit;
-	static int numParkingSpaces;
+	static int numVehicleTypes; //total number of vehicle types
+	static int roadLength; //road distance
+	static int speedLimit; //speed limit
+	static int numParkingSpaces; // parking spaces availiable
 	
 	string type;
-	double numMean;
-	double numStandardDev;
-	double speedMean;
-	double speedStandardDev;
+	double numMean; //mean total vehicles for simulation
+	double numStandardDev; //sd for vehicles in simulation
+	double speedMean; //mean speed for vehciles in simulation
+	double speedStandardDev; //sd speed for vehciles in simulation
 	
+	double avgVehiclePerDay; //average vehicles per day of this type
 	
 	Stats(string type, double numMean, double numStandardDev
 		, double speedMean, double speedStandardDev);

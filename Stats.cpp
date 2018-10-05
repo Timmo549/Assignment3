@@ -5,7 +5,7 @@
 using namespace std;
 
 Stats::Stats(string type, double numMean, double numStandardDev
-		, double speedMean, double speedStandardDev) {
+		, double speedMean, double speedStandardDev) { //contructor
 	this->type = type;
 	this->numMean = numMean;
 	this->numStandardDev = numStandardDev;
@@ -13,12 +13,13 @@ Stats::Stats(string type, double numMean, double numStandardDev
 	this->speedStandardDev = speedStandardDev;			
 }
 
-void Stats::print() {
+void Stats::print() { //print info
 	cout << Stats::numVehicleTypes << ':' << Stats::roadLength << ':';
-	cout << Stats::speedLimit << ':' << Stats::numParkingSpaces;	
+	cout << Stats::speedLimit << ':' << Stats::numParkingSpaces;
+	cout << endl;	
 }
 
-void Stats::printStats() {
+void Stats::printStats() { //print stats
 	cout << type << ':' << numMean << ':' << numStandardDev << ':';
 	cout << speedMean << ':' << speedStandardDev;
 }

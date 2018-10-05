@@ -23,13 +23,13 @@ OverrideOutputName=
 HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
-CommandLine=Vehicles.txt Stats.txt 1
+CommandLine=Vehicles.txt Stats.txt 3
 Folders=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=6
+UnitCount=8
 
 [VersionInfo]
 Major=1
@@ -102,6 +102,26 @@ BuildCmd=
 
 [Unit6]
 FileName=Vehicle.h
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit7]
+FileName=ActivityStats.h
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit8]
+FileName=ActivityStats.cpp
 CompileCpp=1
 Folder=
 Compile=1

@@ -1,11 +1,11 @@
 # Project: CSCI262Assignment3
 # Makefile created by Dev-C++ 5.11
 
-CPP      = g++.exe
-CC       = gcc.exe
+CPP      = g++.exe -std=c++11
+CC       = gcc.exe -std=c++11
 WINDRES  = windres.exe
-OBJ      = Traffic.o Stats.o Vehicle.o
-LINKOBJ  = Traffic.o Stats.o Vehicle.o
+OBJ      = Traffic.o Stats.o Vehicle.o ActivityStats.o
+LINKOBJ  = Traffic.o Stats.o Vehicle.o ActivityStats.o
 LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
@@ -32,3 +32,6 @@ Stats.o: Stats.cpp
 
 Vehicle.o: Vehicle.cpp
 	$(CPP) -c Vehicle.cpp -o Vehicle.o $(CXXFLAGS)
+
+ActivityStats.o: ActivityStats.cpp
+	$(CPP) -c ActivityStats.cpp -o ActivityStats.o $(CXXFLAGS)
