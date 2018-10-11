@@ -12,10 +12,10 @@ struct Stats {
 	static int numParkingSpaces; // parking spaces availiable
 	
 	string type;
-	double numMean; //mean total vehicles for simulation
-	double numStandardDev; //sd for vehicles in simulation
-	double speedMean; //mean speed for vehciles in simulation
-	double speedStandardDev; //sd speed for vehciles in simulation
+	double numMean; //mean total vehicles of a type for simulation
+	double numStandardDev; //sd for vehicles of a type in simulation
+	double speedMean; //mean speed for vehciles " " " in simulation
+	double speedStandardDev; //sd speed for vehciles " " " in simulation
 	
 	double avgVehiclePerDay; //average vehicles per day of this type
 	

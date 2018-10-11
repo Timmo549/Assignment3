@@ -18,9 +18,9 @@ using namespace std;
 char *statsFile;
 char *vehiclesFile;
 
-map<string, Stats> stats;
-multimap<string, ActivityStats> activityStats;
-vector<Vehicle> vehicles;
+map<string, Stats> stats; // Vehcile Type Stats
+multimap<string, ActivityStats> activityStats; // Individual Vehicle Stats 
+vector<Vehicle> vehicles; // Vehicle Types
 int numVehicleTypes;
 
 int Stats::numVehicleTypes; //total number of types of vehicles
@@ -71,26 +71,62 @@ void activityEngine(int dayCount, int spacesFree){
 		
 		if(getVehiclesActive() >= 1){ //if there are any vehicles active
 
-			if(currTime >= 1380){ //if it is after 11pm (2300)
-				//determine probabilities and "roll the dice for which event"
+			// check whether any vehicle has finished the road
+			multimap<string, ActivityStats>::iterator itr = activityStats.begin();
+			while (itr != activityStats.end()){ //while more vehicles to process
+				(*itr).second.distanceTravelled += (((*itr).second.speed/3.6)*60); 
+				//recalculate distance travelled
 				
+				if ((*itr).second.distanceTravelled >= Stats::roadLength){ //if past end of road
+					departEndRoad((*itr).second, currTime);	//depart end road			
+				}
+				itr++; //incrememnt counter
+			}
+
+			if(currTime >= 1380){ //if it is after 11pm (2300)
+
+				//determine probabilities and "roll the dice for which event"
 				//only 2,3,4,5
-				//void departSideRoad() incomplete
-				//void departEndRoad() incomplete
-				//void parked() returns false if there are no vehicles to park or stop parking
-				//void moves() incomplete
+				int num = 0; // CHANGE
+				switch(num){
+					case(1):
+						departSideRoad(currTime);						
+						break;
+					case(2):
+						parked();
+						//void parked() returns false if there are no vehicles to park or stop parking
+						break;
+					case(3):
+						//moves();
+						//void moves() incomplete
+						break;
+				}				
 			}
 			else{
+				// check whether any vehicle has finished the road
+				//departEndRoad(currTime);
+
 				//determine probabilities and "roll the dice for which event"
 				//the probabilities should go up and down depending on what should happen
 				//e.g. an arrival should be at a low chance if there the activity system is almost full
-				
-				// 1,2,3,4,5 
-				//void createArrival(vehicle type, currTime)
-				//void departSideRoad() incomplete
-				//void departEndRoad() incomplete
-				//void parked()  returns false if there are no vehicles to park or stop parking
-				//void moves() incomplete
+				// 1,2,3,4 
+				int num = 0; // CHANGE
+				switch(num){
+					case(1):
+						//createArrival(); //void createArrival(vehicle type, currTime)
+						break;
+					case(2):
+						departSideRoad(currTime); //void departSideRoad(int currTime)
+						break;
+					case(3):
+						parked();
+						//void parked()  returns false if there are no vehicles to park or stop parking
+						break;
+					case(4):
+						//moves();
+						//void moves() incomplete
+						break;												
+				}
 			}
 			
 		}
@@ -104,33 +140,48 @@ void activityEngine(int dayCount, int spacesFree){
 	}
 }
 
+
+
+
 void createArrival(string type, int arrival){ //event 1, add vehicle into system
 	ActivityStats v; //create new activity
 	v.type = type; //set the type of vehicle
 	v.arrivalTime = arrival; //set the arrival time(start) time of the activity
+	v.distanceTravelled = 0;
+	v.parked = false;
+	v.speed = 0;
+	//v.speed = insertspeedfunction()
 	activityStats.insert(pair<string, ActivityStats>(v.type, v)); //insert into all activities
 }
 
-void departSideRoad(){ //event 2, vehicle departs from side road
-	//incomplete
+void departSideRoad(int currTime){ //event 2, vehicle departs from side road
+	vector<Vehicle>::iterator current = shuffleVehicleType();
+	
+	multimap<string, ActivityStats>::iterator itr = activityStats.find((*current).name);
+	(*itr).second.exitTime = currTime;
+	(*itr).second.speedMean = calAvgSpeed((*itr).second.exitTime, Stats::roadLength);
+
+	//incomplete possibly idk
 }
 
-void departEndRoad(){ //event 3, vehicle departs from end of road
-	//incomplete
+void departEndRoad(ActivityStats stats, int currTime){ //event 3, vehicle departs from end of road
+	//incomplete possibly idk
+	
+	stats.exitTime = currTime;
+	stats.speedMean = calAvgSpeed(stats.exitTime, Stats::roadLength);
+	// add speedMean to rolling average for Vehicle Type Stats
 }
 
 void parked(){ //event 4, vehicle parks or stops parking
 	string random; //vehicle chosen at random that is able to pork
 	bool found = false; //used to determine if there is an activity that can be parked
 	
-	random_shuffle(vehicles.begin(),vehicles.end()); //shuffles the order of all vehicle types
-	vector<Vehicle>::iterator itr = vehicles.begin();
-	auto current = itr; //variable to store the current position in the vector
+	vector<Vehicle>::iterator current = shuffleVehicleType();
 	
 	while(!found){ //while there is an activity that needs to be parked
 		for (vector<Vehicle>::iterator itr = current; itr != vehicles.end(); itr++) { //find the type of vehicle to be parked
 			if((*itr).parkFlag){ //if the type of vehicle can be parked
-			 	random = (*itr).name; //get the name of vehicle
+			 	random = (*itr).name; //get the type of vehicle
 			 	current = itr; //reset the start position of iterator
 			 	break;
 			}  
@@ -154,16 +205,23 @@ void parked(){ //event 4, vehicle parks or stops parking
 
 void moves(){ //event 5, vehicle moves and may change speed
 	//incomplete
+	//speed changed +-10%
 }
+
+
 
 int getVehiclesActive(){ //get the number of vehciles active in the system
 	int count = 0;
 	for (multimap<string, ActivityStats>::iterator itr = activityStats.begin(); itr != activityStats.end(); itr++) { //iteratre through
-		 if((*itr).second.arrivalTime > 0 && (*itr).second.exitTime == 0){
+		 if((*itr).second.arrivalTime > -1 && (*itr).second.exitTime == 0){
 		 	count++;
 		 }  
 	}
 	return count;
+}
+
+double calAvgSpeed(int time, int distance){ //average speed
+	return distance/time;
 }
 
 void initialize () { //initialise program
@@ -267,6 +325,14 @@ bool initStats() {
 	fin.close();	
 	return true;	
 }
+
+vector<Vehicle>::iterator shuffleVehicleType(){
+	random_shuffle(vehicles.begin(),vehicles.end()); //shuffles the order of all vehicle types
+	vector<Vehicle>::iterator current = vehicles.begin();	//variable to store the current position in the vector
+	return current;
+}
+
+
 
 bool isTrue(char c) { //test whether char is true or false
 	if (c == '1') { //if 1 then true

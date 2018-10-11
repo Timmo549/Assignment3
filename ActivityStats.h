@@ -8,10 +8,13 @@ using namespace std;
 
 struct ActivityStats{
 	string type;
-	double numMean;
-	double numStandardDev;
+	//double numMean;
+	//double numStandardDev;
+	double speed;
 	double speedMean;
-	double speedStandardDev;
+	double distanceTravelled;
+	
+	//double speedStandardDev;
 	
 	double arrivalTime;
 	double exitTime;
