@@ -17,6 +17,7 @@ void createArrival(string type, int arrival);
 void departSideRoad(int currTime);
 void departEndRoad(ActivityStats stats, int currTime);
 void parked();
-void moves();
+void moves(int currTime);
  
+int randomInt(auto uniform);
 bool isTrue(char c); //check if char is true or false

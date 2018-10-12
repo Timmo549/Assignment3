@@ -51,7 +51,6 @@ main(int argc, char* argv[]) {
 		for (map<string, Stats>::iterator itr = stats.begin(); itr != stats.end(); itr++) { //set the average vehices each day for each vehicle type
 			(*itr).second.avgVehiclePerDay = (*itr).second.numMean/totalVehicles;
 		}		
-		
 		int dayCount = 1; //current day 
 		int spacesFree; //spaces free for parking
 		
@@ -68,29 +67,27 @@ main(int argc, char* argv[]) {
 void activityEngine(int dayCount, int spacesFree){
 	int currTime = 0; //time in minutes 0-1440
 	while(currTime < 1440){ //for the entire day, do this
-		
-		if(getVehiclesActive() >= 1){ //if there are any vehicles active
-
+	
+		if(getVehiclesActive() == 1){ //if there are any vehicles active
 			// check whether any vehicle has finished the road
 			multimap<string, ActivityStats>::iterator itr = activityStats.begin();
 			while (itr != activityStats.end()){ //while more vehicles to process
-				(*itr).second.distanceTravelled += (((*itr).second.speed/3.6)*60); 
-				//recalculate distance travelled
-				
 				if ((*itr).second.distanceTravelled >= Stats::roadLength){ //if past end of road
 					departEndRoad((*itr).second, currTime);	//depart end road			
 				}
 				itr++; //incrememnt counter
 			}
-
+			
 			if(currTime >= 1380){ //if it is after 11pm (2300)
+				static uniform_int_distribution<unsigned> uniform (1,3);
 
 				//determine probabilities and "roll the dice for which event"
 				//only 2,3,4,5
-				int num = 0; // CHANGE
-				switch(num){
+				int action = randomInt(uniform); // random number generated
+				switch(action){ //depending on random number
 					case(1):
-						departSideRoad(currTime);						
+						departSideRoad(currTime);			
+						// void departSideRoad(int currTime);			
 						break;
 					case(2):
 						parked();
@@ -101,40 +98,44 @@ void activityEngine(int dayCount, int spacesFree){
 						//void moves() incomplete
 						break;
 				}				
-			}
-			else{
-				// check whether any vehicle has finished the road
-				//departEndRoad(currTime);
+			} else{
+				static uniform_int_distribution<unsigned> uniform (1,4);
 
 				//determine probabilities and "roll the dice for which event"
 				//the probabilities should go up and down depending on what should happen
 				//e.g. an arrival should be at a low chance if there the activity system is almost full
 				// 1,2,3,4 
-				int num = 0; // CHANGE
-				switch(num){
+				int action = randomInt(uniform); // random number generated
+				switch(action){ //depending on random number
 					case(1):
-						//createArrival(); //void createArrival(vehicle type, currTime)
+						//createArrival(); 
+						//void createArrival(vehicle type, currTime)
 						break;
 					case(2):
-						departSideRoad(currTime); //void departSideRoad(int currTime)
+						departSideRoad(currTime); 
+						// void departSideRoad(int currTime);
 						break;
 					case(3):
 						parked();
-						//void parked()  returns false if there are no vehicles to park or stop parking
+						//void parked() returns false if there are no vehicles to park or stop parking
 						break;
 					case(4):
-						//moves();
+						moves(currTime);
 						//void moves() incomplete
 						break;												
 				}
 			}
+		} else{
+			static uniform_int_distribution<unsigned> uniform (1,2);
+			int random = randomInt(uniform); // random number generated
 			
-		}
-		else{
 			//determine probability(event happens or not. 1 or nothing 50/50 chance)
-			
-			//createArrival(vehicle type, currTime);
-			//dont create arrival
+			if (random == 1){
+				//createArrival();
+				//createArrival(vehicle type, currTime);
+			} else{
+				//dont create arrival			
+			}
 		}
 		currTime++;
 	}
@@ -150,6 +151,7 @@ void createArrival(string type, int arrival){ //event 1, add vehicle into system
 	v.distanceTravelled = 0;
 	v.parked = false;
 	v.speed = 0;
+	v.movedTime = 0;
 	//v.speed = insertspeedfunction()
 	activityStats.insert(pair<string, ActivityStats>(v.type, v)); //insert into all activities
 }
@@ -203,21 +205,38 @@ void parked(){ //event 4, vehicle parks or stops parking
 	}
 }
 
-void moves(){ //event 5, vehicle moves and may change speed
+void moves(int currTime){ //event 5, vehicle moves and may change speed
 	//incomplete
+	static uniform_int_distribution<signed> uniform (-10,10);
+	
+	multimap<string, ActivityStats>::iterator itr = activityStats.begin();
+	while (itr != activityStats.end()){ //while more vehicles to process
+		(*itr).second.distanceTravelled += (((*itr).second.speed/3.6)
+									   * (currTime-(*itr).second.movedTime)); 
+		//recalculate distance travelled
+		(*itr).second.movedTime = currTime; // set time moved to current time
+	}
+	itr++; //incrememnt counter
+	
 	//speed changed +-10%
+	int random = randomInt(uniform); //random number between -10 and +10
+	if (random != 0){
+		(*itr).second.speed *= (random / 100);	
+	}
 }
 
 
 
 int getVehiclesActive(){ //get the number of vehciles active in the system
-	int count = 0;
+//	int count = 0;
 	for (multimap<string, ActivityStats>::iterator itr = activityStats.begin(); itr != activityStats.end(); itr++) { //iteratre through
 		 if((*itr).second.arrivalTime > -1 && (*itr).second.exitTime == 0){
-		 	count++;
+		 	//count++;
+		 	return 1;
 		 }  
 	}
-	return count;
+	return 0;
+//	return count;
 }
 
 double calAvgSpeed(int time, int distance){ //average speed
@@ -239,6 +258,7 @@ void initialize () { //initialise program
 	cout << endl << endl << "Stats File..." << endl;
 	
 	Stats::print();
+	cout << endl << " Vehicle Stats:";
 	for (map<string, Stats>::iterator itr = stats.begin(); itr != stats.end(); itr++) { 
 		(*itr).second.printStats();
 	}	
@@ -332,7 +352,10 @@ vector<Vehicle>::iterator shuffleVehicleType(){
 	return current;
 }
 
-
+int randomInt(auto uniform){ // generates random number based on range/distribution input
+	static default_random_engine randEng;
+	return uniform(randEng);
+}
 
 bool isTrue(char c) { //test whether char is true or false
 	if (c == '1') { //if 1 then true

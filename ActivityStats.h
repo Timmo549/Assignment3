@@ -17,6 +17,7 @@ struct ActivityStats{
 	//double speedStandardDev;
 	
 	double arrivalTime;
+	double movedTime;
 	double exitTime;
 	bool parked;
 	
