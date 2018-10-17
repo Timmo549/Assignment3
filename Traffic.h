@@ -16,7 +16,7 @@ vector<Vehicle>::iterator shuffleVehicleType();
 void createArrival(int arrival);
 void departSideRoad(int currTime);
 void departEndRoad(ActivityStats stats, int currTime);
-void parked();
+void parked(int &spacesFree);
 void moves(int currTime);
 
 double setSpeed(); 
