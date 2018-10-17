@@ -11,8 +11,5 @@ ActivityStats::ActivityStats(){
 	parked = false;
 }
 
-void ActivityStats::printStats() {
-	cout << type << ':' << numMean << ':' << numStandardDev << ':';
-	cout << speedMean << ':' << speedStandardDev;
-}
+
 

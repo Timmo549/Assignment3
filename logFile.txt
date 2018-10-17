@@ -1,0 +1,35 @@
+6:5:60:20
+
+Day 1: 
+
+Bus:0:nan:nan:nan
+Motorbike:0:nan:nan:nan
+Red car:0:nan:nan:nan
+Elephant:0:nan:nan:nan
+Taxi:0:nan:nan:nan
+Emergency:0:nan:nan:nan
+
+
+Day 2: 
+
+Bus:0:nan:nan:nan
+Motorbike:0:nan:nan:nan
+Red car:0:nan:nan:nan
+Elephant:0:nan:nan:nan
+Taxi:0:nan:nan:nan
+Emergency:0:nan:nan:nan
+
+
+Day 3: 
+
+Bus:0:nan:nan:nan
+Motorbike:0:nan:nan:nan
+Red car:0:nan:nan:nan
+Elephant:0:nan:nan:nan
+Taxi:0:nan:nan:nan
+Emergency:0:nan:nan:nan
+
+
+
+
+

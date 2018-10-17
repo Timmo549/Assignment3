@@ -54,18 +54,68 @@ main(int argc, char* argv[]) {
 		int dayCount = 1; //current day 
 		int spacesFree; //spaces free for parking
 		
+		ofstream fout;
+		fout.open("logFile.txt");
+		
+		//Output to log file the initial stats
+		fout << Stats::numVehicleTypes << ':' << Stats::roadLength << ':' << Stats::speedLimit << ':' << Stats::numParkingSpaces << endl << endl;
+		
 		//start simulation
 		while(dayCount <= days){ //while simulation isn't complete
 			spacesFree = Stats::numParkingSpaces; //reset the spaces free at the start of every day(*****Please confirm you need to reset spaces every day*****)
 			activityEngine(dayCount, spacesFree); //simulate current day
+			
+			fout << "Day " << dayCount << ": " << endl << endl;
+			
+			vector<Vehicle>::iterator current = vehicles.begin();
+			
+			while (current != vehicles.end()){
+				string type = (*current).name;
+				int numVehicles = 0;
+				double speedMean = 0;
+				double distanceTravelledMean = 0;
+				double parked = 0;
+				
+				multimap<string, ActivityStats>::iterator itr = activityStats.begin();
+				
+				while (itr != activityStats.end()){
+									
+					if ((*itr).first == type){
+						numVehicles++;
+						speedMean += (*itr).second.speedMean;
+						distanceTravelledMean += (*itr).second.distanceTravelled;
+						if((*itr).second.parked){ parked++; }
+					}
+					
+					itr++;
+				}
+				
+				speedMean = speedMean/numVehicles;
+				distanceTravelledMean = distanceTravelledMean/numVehicles;
+				parked = parked/numVehicles;
+				
+				fout << type << ":" << numVehicles << ":" << speedMean << ":" << distanceTravelledMean << ":" << parked;
+				
+				current++;
+			}
+
+			fout  << endl << endl << endl;
+			
+			activityStats.clear();
+			
 			dayCount++; //increment to the next day
 		}
+		
+		fout << endl << endl << endl;
+		
+		fout.close();
 	}
 	return 0;
 }
 
 void activityEngine(int dayCount, int spacesFree){
 	int currTime = 0; //time in minutes 0-1440
+
 	while(currTime < 1440){ //for the entire day, do this
 	
 		if(getVehiclesActive() == 1){ //if there are any vehicles active
@@ -75,7 +125,7 @@ void activityEngine(int dayCount, int spacesFree){
 				if ((*itr).second.distanceTravelled >= Stats::roadLength){ //if past end of road
 					departEndRoad((*itr).second, currTime);	//depart end road			
 				}
-				itr++; //incrememnt counter
+				itr++; //increment counter
 			}
 			
 			if(currTime >= 1380){ //if it is after 11pm (2300)
@@ -94,11 +144,12 @@ void activityEngine(int dayCount, int spacesFree){
 						//void parked() returns false if there are no vehicles to park or stop parking
 						break;
 					case(3):
-						//moves();
+						moves(currTime);
 						//void moves() incomplete
 						break;
 				}				
-			} else{
+			} 
+			else{
 				static uniform_int_distribution<unsigned> uniform (1,4);
 
 				//determine probabilities and "roll the dice for which event"
@@ -108,8 +159,7 @@ void activityEngine(int dayCount, int spacesFree){
 				int action = randomInt(uniform); // random number generated
 				switch(action){ //depending on random number
 					case(1):
-						//createArrival(); 
-						//void createArrival(vehicle type, currTime)
+						createArrival(currTime);
 						break;
 					case(2):
 						departSideRoad(currTime); 
@@ -125,26 +175,28 @@ void activityEngine(int dayCount, int spacesFree){
 						break;												
 				}
 			}
-		} else{
+		} 
+		else{
 			static uniform_int_distribution<unsigned> uniform (1,2);
 			int random = randomInt(uniform); // random number generated
 			
 			//determine probability(event happens or not. 1 or nothing 50/50 chance)
 			if (random == 1){
-				//createArrival();
-				//createArrival(vehicle type, currTime);
-			} else{
-				//dont create arrival			
+				createArrival(currTime);
 			}
 		}
 		currTime++;
 	}
 }
 
+void createArrival(int arrival){ //event 1, add vehicle into system
+	string type;	
+	vector<Vehicle>::iterator current = shuffleVehicleType();
+	for (vector<Vehicle>::iterator itr = current; itr != vehicles.end(); itr++) {
+		 type = (*itr).name; //get the type of vehicle
+		 break;
+	}
 
-
-
-void createArrival(string type, int arrival){ //event 1, add vehicle into system
 	ActivityStats v; //create new activity
 	v.type = type; //set the type of vehicle
 	v.arrivalTime = arrival; //set the arrival time(start) time of the activity
@@ -152,8 +204,21 @@ void createArrival(string type, int arrival){ //event 1, add vehicle into system
 	v.parked = false;
 	v.speed = 0;
 	v.movedTime = 0;
-	//v.speed = insertspeedfunction()
+	v.speed = setSpeed();
 	activityStats.insert(pair<string, ActivityStats>(v.type, v)); //insert into all activities
+}
+
+double setSpeed(){
+	double avgSpeed = Stats::speedLimit;
+	static uniform_int_distribution<signed> uniform (-15,15);
+	//speed changed +-15%
+	int random = randomInt(uniform); //random number between -15 and +15
+		
+	if (random != 0){
+		avgSpeed *= (random / 100);	
+	}
+	
+	return avgSpeed;
 }
 
 void departSideRoad(int currTime){ //event 2, vehicle departs from side road
@@ -202,6 +267,8 @@ void parked(){ //event 4, vehicle parks or stops parking
 			 	break;
 			}
 		}
+		
+		found = true;
 	}
 }
 
