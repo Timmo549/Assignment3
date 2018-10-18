@@ -10,12 +10,12 @@ bool initStats();
 void activityEngine(int dayCount, int spacesFree); //activity engine
 int getVehiclesActive(); //get number of vehicles active
 double calAvgSpeed(int time, int distance);
-vector<Vehicle>::iterator shuffleVehicleType();
+Vehicle shuffleVehicleType();
 
 //events
 void createArrival(int arrival);
 void departSideRoad(int currTime);
-void departEndRoad(ActivityStats stats, int currTime);
+void departEndRoad(ActivityStats &stats, int currTime);
 void parked(int &spacesFree);
 void moves(int currTime);
 

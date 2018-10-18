@@ -17,6 +17,9 @@ struct Stats {
 	double speedMean; //mean speed for vehciles " " " in simulation
 	double speedStandardDev; //sd speed for vehciles " " " in simulation
 	
+	int numVehicles; //total vehicles of type across day of simulation
+	double totalSpeed; //total speed of all vehicles of type across day of simulation
+	
 	double avgVehiclePerDay; //average vehicles per day of this type
 	
 	Stats(string type, double numMean, double numStandardDev

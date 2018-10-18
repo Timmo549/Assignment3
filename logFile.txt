@@ -1,14 +1,12 @@
 6:5:60:20
 
 Day 1: 
-
-
-Taxi:0:nan:nan:nanBus:0:nan:nan:nan
-Elephant:0:nan:nan:nan
-Red car:0:nan:nan:nan
-Emergency:0:nan:nan:nan
-Motorbike:0:nan:nan:nan
-
+Bus:56:0:inf:0
+Elephant:58:0:inf:0
+Emergency:53:0:inf:0
+Motorbike:60:0:inf:0
+Red car:44:0:24651.7:0
+Taxi:73:0:inf:0
 
 
 

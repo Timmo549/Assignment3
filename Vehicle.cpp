@@ -20,5 +20,5 @@ void Vehicle::print() {
 	for (int i = 0; i < strlen(regFormat); i++) {
 		cout << regFormat[i];
 	}
-	cout << ":" << volWeight << ":" << speedWeight;// << endl;
+	cout << ":" << volWeight << ":" << speedWeight << endl;
 }

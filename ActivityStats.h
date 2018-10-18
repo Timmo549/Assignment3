@@ -7,6 +7,7 @@
 using namespace std;
 
 struct ActivityStats{
+	bool active;
 	string type;
 	double speed;
 	double speedMean;
@@ -17,7 +18,7 @@ struct ActivityStats{
 	double exitTime;
 	bool parked;
 	
-	ActivityStats();
+	ActivityStats(string type, int currTime, double speed);
 	void printStats();
 };
 

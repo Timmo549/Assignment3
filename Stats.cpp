@@ -11,6 +11,9 @@ Stats::Stats(string type, double numMean, double numStandardDev
 	this->numStandardDev = numStandardDev;
 	this->speedMean = speedMean;
 	this->speedStandardDev = speedStandardDev;			
+	
+	this->numVehicles = 0;
+	this->totalSpeed = 0;
 }
 
 void Stats::print() { //print info
@@ -21,5 +24,5 @@ void Stats::print() { //print info
 
 void Stats::printStats() { //print stats
 	cout << type << ':' << numMean << ':' << numStandardDev << ':';
-	cout << speedMean << ':' << speedStandardDev;
+	cout << speedMean << ':' << speedStandardDev << endl;
 }
