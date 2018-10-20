@@ -66,18 +66,13 @@ main(int argc, char* argv[]) {
 			(*itr).second.numMean = 0;
 			(*itr).second.numStandardDev = 0;			
 			(*itr).second.speedMean = 0;
-			(*itr).second.speedStandardDev = 0;	
-			(*itr).second.numVehicles = 0;
-			(*itr).second.totalSpeed = 0;	
+			(*itr).second.speedStandardDev = 0;		
 			itr++;	
 		}
 		
-		cout << "Activity Engine Started..." << endl << endl;
-
 		//start simulation
 		while(dayCount <= days){ //while simulation isn't complete
 			spacesFree = Stats::numParkingSpaces; //reset the spaces free at the start of every day(*****Please confirm you need to reset spaces every day*****)
-			
 			activityEngine(dayCount, spacesFree); //simulate current day
 			
 			fout << "Day " << dayCount << ": " << endl;
@@ -86,27 +81,32 @@ main(int argc, char* argv[]) {
 			map<string, Stats>::iterator current;
 						
 			while (itr != activityStats.end() && !(*itr).active){
-					current = calcStats.find((*itr).type);	
-					cout << "Current Vehicle: " << (*itr).exitTime;			
+					current = calcStats.find((*itr).type);				
 					(*current).second.numVehicles++;
-					cout << "Vehicle Avg: " << (*itr).speedMean << endl;
+					cout << "AVG speed: " << (*itr).speedMean << endl;
+//					if ((*itr).speedMean < 1000) {
 					(*current).second.totalSpeed += (*itr).speedMean;
-					cout << "Mean speed: " << (*current).second.totalSpeed << endl;
+					cout << "Mean speed: " << (*current).second.totalSpeed << endl;						
+//					}					
+
 					itr++;
 			}
 			
 			current = calcStats.begin();
 			
-/*			while (current != calcStats.end()){
+			while (current != calcStats.end()){
+				cout << (*current).first << endl;
 				// rolling average number of vehicles
 				(*current).second.numMean = 
 				(((*current).second.numMean * (dayCount - 1)) + 
 														(*current).second.numVehicles) / dayCount;
 				
-				// rolling average speed of vehicles 
+				// rolling average speed of vehicles
 				(*current).second.speedMean =
 				(((*current).second.speedMean * (dayCount - 1)) + 
 														(*current).second.totalSpeed) / dayCount;
+				
+				cout << (*current).second.speedMean << "SM TS" << (*current).second.totalSpeed << endl; 
 				
 				//(*current).second.printStats();	
 				//cout << endl;		
@@ -120,34 +120,6 @@ main(int argc, char* argv[]) {
 				(*current).second.totalSpeed = 0;
 				current++;				
 			}
-*/
-
-			while (current != calcStats.end()){
-                // rolling average number of vehicles
-                (*current).second.numMean = 
-                (((*current).second.numMean * (dayCount - 1)) + 
-                                                        (*current).second.numVehicles) / dayCount;
-
-                cout << "TEST!" << (*current).second.totalSpeed / dayCount << endl;
-                // rolling average speed of vehicles
-                (*current).second.speedMean =
-                (((*current).second.speedMean * (dayCount - 1)) + 
-                                                        (*current).second.totalSpeed) / dayCount;
-                cout <<  (((*current).second.speedMean * (dayCount - 1)) + ((*current).second.totalSpeed) / dayCount) << endl;
-                //(current).second.printStats();
-                //cout << endl;
-
-                cout << "gimme speed: " << (*current).second.speedMean << endl;
-
-                fout << (*current).second.type << ":" << (*current).second.numMean << ":" 
-                     << (*current).second.numStandardDev << ":" << (*current).second.speedMean << ":" 
-                     << (*current).second.speedStandardDev << endl;
-                fout.flush();
-
-                (*current).second.numVehicles = 0;
-                (*current).second.totalSpeed = 0;
-                current++;
-            }
 	
 			fout  << endl;
 			
@@ -169,20 +141,17 @@ main(int argc, char* argv[]) {
 void activityEngine(int dayCount, int spacesFree){
 	int currTime = 0; //time in minutes 0-1440
 
-	cout << "DAY " << dayCount << " STARTED" << endl;
-	cout << "..." << endl;
-	
 	while(currTime < 1440){ //for the entire day, do this
 	
-		//cout << "THE TIME IS: " << currTime << endl;
+		cout << "THE TIME IS: " << currTime << endl;
 	
 		if(getVehiclesActive() == 1){ //if there are any vehicles active
 			// check whether any vehicle has finished the road
 			vector<ActivityStats>::iterator itr = activityStats.begin();
 			while (itr != activityStats.end()){ //while more vehicles to process
-				if ((*itr).active && ((*itr).distanceTravelled) >= (Stats::roadLength * 1000)){ //if past end of road
-					//departEndRoad((*itr), currTime);	//depart end road	
-					//cout << (*itr).type << " DEPARTED" << endl << endl << endl;
+				if ((*itr).active && (*itr).parked == false && ((*itr).distanceTravelled) >= (Stats::roadLength * 1000)){ //if past end of road
+					departEndRoad((*itr), currTime);	//depart end road	
+					cout << (*itr).type << " DEPARTED" << endl << endl << endl;
 					(*itr).active = false;
 				}
 				itr++; //increment counter
@@ -198,8 +167,8 @@ void activityEngine(int dayCount, int spacesFree){
 //				cout << "A11: " << action << endl;
 				switch(action){ //depending on random number
 					case(1):
-						departSideRoad(currTime);	//void departSideRoad(int currTime);			
-						//cout << "departed via side road" << endl;
+						departSideRoad(currTime);						
+						cout << "departed via side road" << endl;
 						break;
 					case(2):
 						if (spacesFree <= Stats::numParkingSpaces){
@@ -209,7 +178,7 @@ void activityEngine(int dayCount, int spacesFree){
 						break;
 					case(3):
 						moves(currTime);
-						//cout << "moves" << endl;
+						cout << "moves" << endl;
 						//void moves() incomplete
 						break;
 				}				
@@ -229,8 +198,8 @@ void activityEngine(int dayCount, int spacesFree){
 							createArrival(currTime);
 							break;
 						case(2):
-							departSideRoad(currTime); // void departSideRoad(int currTime);
-							//cout << "departed via side road" << endl;
+							departSideRoad(currTime); 
+							cout << "departed via side road" << endl;
 							break;
 						case(3):
 							if (spacesFree <= Stats::numParkingSpaces){
@@ -240,7 +209,7 @@ void activityEngine(int dayCount, int spacesFree){
 							break;
 						case(4):
 							moves(currTime);
-							//cout << "moves" << endl;
+							cout << "moves" << endl;
 							//void moves() incomplete
 							break;												
 					}
@@ -267,7 +236,7 @@ void createArrival(int arrivalTime){ //event 1, add vehicle into system
 	string random = shuffleVehicleType().name;
 
 	ActivityStats v(random, arrivalTime, setSpeed()); //create new activity
-	// cout << v.type << ": "<< v.speed << endl;
+	cout << v.type << ": "<< v.speed << endl;
 	activityStats.push_back(v); //insert into all activities
 }
 
@@ -276,28 +245,13 @@ void departSideRoad(int currTime){ //event 2, vehicle departs from side road
 	bool found = false;
 	
 	while (!found && itr != activityStats.end()){
-		if ((*itr).active) {
+		if ((*itr).active && (*itr).distanceTravelled > 0 && (*itr).parked == false) {
 			(*itr).exitTime = currTime;
-			
-			cout << "Exit " << (*itr).exitTime;
-			cout << "Arrival " << (*itr).arrivalTime << endl << endl;	
-			cout <<	((*itr).exitTime - (*itr).arrivalTime) << endl;	
-			cout << double ((*itr).distanceTravelled/1000) << endl;
-//			cout << calAvgSpeed(( (*itr).exitTime - (*itr).arrivalTime ), ((*itr).distanceTravelled/1000)) << endl;
-			
-			if (((*itr).distanceTravelled/1000) != 0){
-			(*itr).speedMean = calAvgSpeed(( int ((*itr).exitTime - (*itr).arrivalTime )), double ((*itr).distanceTravelled/1000));
-			
-			cout << "SPEED MEAN " << (*itr).speedMean << endl;
-			
+	cout << (*itr).distanceTravelled/1000 << " " << ((*itr).exitTime-(*itr).arrivalTime)/60 << endl;
+	cout << "AVERAGE::: " << double ((*itr).distanceTravelled/1000) / int (((*itr).exitTime-(*itr).arrivalTime)/60)	<< endl;		
+			(*itr).speedMean = calAvgSpeed( int ((*itr).exitTime-(*itr).arrivalTime), double ((*itr).distanceTravelled/1000));
 			(*itr).active = false;					
-			found = true;				
-			cout << "departed via side road" << endl;
-
-			} else {
-//				moves(currTime);
-break;
-			}
+			found = true;
 		}
 		itr++;
 	}
@@ -311,7 +265,6 @@ void departEndRoad(ActivityStats &stats, int currTime){ //event 3, vehicle depar
 	
 	stats.exitTime = currTime;
 	cout << "departed end road" << endl;
-//	cout << "TEST";
 	stats.speedMean = calAvgSpeed((stats.exitTime-stats.arrivalTime), Stats::roadLength);
 	// add speedMean to rolling average for Vehicle Type Stats
 }
@@ -361,9 +314,9 @@ void moves(int currTime){ //event 5, vehicle moves and may change speed
 	while (itr != activityStats.end()) { 
 		if( (*itr).active && (*itr).type == randomType && (*itr).parked == false){ //if vehicle is of same type and is parked					   
 			(*itr).distanceTravelled += (((*itr).speed/3.6)
-									   * (currTime-(*itr).movedTime)); 
+									   * double (currTime-(*itr).movedTime)); 
 	
-//				cout << "Metres2: "<< (*itr).distanceTravelled << endl;						   
+				cout << "Metres2: "<< (*itr).distanceTravelled << endl;						   
 									   
 			//recalculate distance travelled
 			(*itr).movedTime = currTime; // set time moved to current time
@@ -421,7 +374,7 @@ void initialize () { //initialise program
 	cout << endl << endl << "Stats File..." << endl;
 	
 	Stats::print();
-	cout << endl << "Vehicle Stats:" << endl;
+	cout << endl << " Vehicle Stats:" << endl;
 	for (map<string, Stats>::iterator itr = stats.begin(); itr != stats.end(); itr++) { 
 		(*itr).second.printStats();
 	}	
@@ -514,14 +467,15 @@ bool initStats() {
 	return true;	
 }
 
-double calAvgSpeed(int time, double distance){ //average speed
-	cout << "SPEEEEEEEEEED " << ( double (distance)/ double (time/60)) << endl;
-	return double (distance)/ double (time/60); // distance = kilometres, time = minutes 
+double calAvgSpeed(double time, double distance){ //average speed
+//	cout << (distance) << " " << (time/60) << endl;
+	return (((distance)/ double (time/60)));
 }
 
 Vehicle shuffleVehicleType(){
-	static uniform_int_distribution<unsigned> uniform (0, Stats::numVehicleTypes-1);
+	static uniform_int_distribution<unsigned> uniform (0, 5/*Stats::numVehicleTypes-1*/);
 	return vehicles[randomInt(uniform)];
+	//return vehicles[0];
 }
 
 int randomInt(auto uniform){ // generates random number based on range/distribution input
