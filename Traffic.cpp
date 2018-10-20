@@ -6,6 +6,7 @@
 #include <map>
 #include <algorithm>
 #include <chrono>
+#include <math>
 
 #include "traffic.h"
 #include "vehicle.h"
@@ -143,7 +144,7 @@ main(int argc, char* argv[]) {
 		
 		analysisEngine();
 
-		cout << "Activity Engine Finished..." << endl << endl;
+		cout << "Analysis Engine Finished..." << endl << endl;
 					
 	}
 	
@@ -512,32 +513,98 @@ bool isTrue(char c) { //test whether char is true or false
 }
 
 void analysisEngine(){
+
+ofstream statsOut("BaseStats.txt");
+
 //	vector<ActivityStats> breachedVehicles ();
 	
 vector<map<string, Stats>>::iterator itr = dayStats.begin();	
+//vector<vector<ActivityStats>>::iterator itr2 = 
 
+double numMean = 0;
+double speedMean = 0;
 
 while (itr != dayStats.end()){
 	map<string, Stats> current = (*itr);
 	map<string, Stats>::iterator iterator = current.begin();
 	while (iterator != current.end()){
-		(*iterator).second.printStats();		
+//		(*iterator).second.printStats();
+
+
+		// rolling average number of vehicles
+		numMean = ((numMean * (dayCount - 1)) + numVehicles) / dayCount;
+					
+		// rolling average speed of vehicles
+		speedMean = ((speedMean * (dayCount - 1)) + (*current).second.totalSpeed) / dayCount;
+	
 		iterator++;	
 	}
 	itr++;
 }
-	
 
+		fout << (*iterator).second.type << ":" << (*iterator).second.numMean << ":" 
+			 << (*iterator).second.numStandardDev << ":" << (*iterator).second.speedMean << ":" 
+			 << (*iterator).second.speedStandardDev << endl;
+		fout.flush();
 						
-//			while (itr != activityStats.end() && !(*itr).active){
-//					itr++;
-//			}
-//	(*current).second.numMean = 
-//				(((*current).second.numMean * (dayCount - 1)) + 
-//														(*current).second.numVehicles) / dayCount;
+/*						
+			vector<ActivityStats>::iterator itr = activityStats.begin();
+			map<string, Stats>::iterator current;
+						
+			while (itr != activityStats.end() && !(*itr).active){
+					current = calcStats.find((*itr).type);				
+					(*current).second.numVehicles++;
+					(*current).second.totalSpeed += (*itr).speedMean;										
+
+					itr++;
+			}
+			
+			current = calcStats.begin();			
+			
+			while (current != calcStats.end()){
+
+				(*current).second.numMean = ((*current).second.numVehicles / dayCount);
 				
-				// rolling average speed of vehicles
-//	(*current).second.speedMean =
-//				(((*current).second.speedMean * (dayCount - 1)) + 
-//														(*current).second.totalSpeed) / dayCount;
+				(*current).second.speedMean = ((*current).second.totalSpeed / dayCount);
+				
+				fout << (*current).second.type << ":" << (*current).second.numMean << ":" 
+					 << (*current).second.numStandardDev << ":" << (*current).second.speedMean << ":" 
+					 << (*current).second.speedStandardDev << endl;
+				fout.flush();
+
+				current++;				
+			}						
+*/						
+
+statsOut.close();
+}
+
+double mean(double sum, int numVehicles){
+    return sum/numVehicles;
+}
+
+double stdDeviation(double data[], int numVehicles){
+    double Sum = 0;
+
+    for(int i = 0; i < length; i++){
+        Sum += data[i];
+    }
+
+    double mean = Sum/(numVehicles); //length = total amount
+
+    double temp = 0;
+
+    for(int i = 0; i < numVehicles; i++){
+        temp = data[i] - mean;
+        data[i] = pow(temp,2);
+    }
+
+    double sum2 = 0;
+
+    for(int i = 0; i < numVehicles; i++){
+        sum2+=data[i];
+    }
+    //cout << "Sample Standard Deviation: " <<(sqrt(sum2/length)) << endl;
+    //cout << "Population Standard Deviation: " <<(sqrt(sum2/(length-1))) << endl
+    return sqrt(sum2/numVehicles);
 }

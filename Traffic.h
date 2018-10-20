@@ -24,3 +24,5 @@ int randomInt(auto uniform);
 bool isTrue(char c); //check if char is true or false
 
 void analysisEngine();
+double mean(double sum, int numVehicles);
+double stdDeviation(double data[], int numVehicles);
