@@ -9,7 +9,7 @@ bool initStats();
 
 void activityEngine(int dayCount, int spacesFree); //activity engine
 int getVehiclesActive(); //get number of vehicles active
-double calAvgSpeed(int time, int distance);
+double calAvgSpeed(double time, double distance);
 Vehicle shuffleVehicleType();
 
 //events
@@ -22,3 +22,5 @@ void moves(int currTime);
 double setSpeed(); 
 int randomInt(auto uniform);
 bool isTrue(char c); //check if char is true or false
+
+void analysisEngine();

@@ -1,12 +1,29 @@
+ActivityEngine...
 6:5:60:20
 
 Day 1: 
-Bus:56:0:inf:0
-Elephant:58:0:inf:0
-Emergency:53:0:inf:0
-Motorbike:60:0:inf:0
-Red car:44:0:24651.7:0
-Taxi:73:0:inf:0
+Bus:37:0:25.9718:0
+Elephant:35:1:23.4336:10
+Emergency:31:0:20.6029:0
+Motorbike:34:3:24.2932:5
+Red car:28:0:20.5612:0
+Taxi:47:2:30.2822:7
+
+Day 2: 
+Bus:19:0:12.3047:0
+Elephant:31:1:21.6184:10
+Emergency:13:0:9.03292:0
+Motorbike:28:3:19.8976:5
+Red car:22:0:15.171:0
+Taxi:38:2:24.8848:7
+
+Day 3: 
+Bus:8:0:5.71096:0
+Elephant:34:1:23.9391:10
+Emergency:13:0:9.68522:0
+Motorbike:35:3:24.6609:5
+Red car:14:0:9.25314:0
+Taxi:37:2:24.2835:7
 
 
 

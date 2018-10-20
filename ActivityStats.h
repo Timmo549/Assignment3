@@ -13,9 +13,9 @@ struct ActivityStats{
 	double speedMean;
 	double distanceTravelled;
 	
-	double arrivalTime;
-	double movedTime;
-	double exitTime;
+	int arrivalTime;
+	int movedTime;
+	int exitTime;
 	bool parked;
 	
 	ActivityStats(string type, int currTime, double speed);
