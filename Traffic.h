@@ -22,9 +22,9 @@ void moves(int currTime);
 double setSpeed(string type); 
 int randomInt(auto uniform);
 bool isTrue(char c); //check if char is true or false
-double stdDeviation(double data[], int numVehicles);
+double stdDeviation(vector<double> data, int days);
 double mean(double sum, int numVehicles);
 bool noVehiclesParkFlag();
 
-void analysisEngine();
+void analysisEngine(int days);
 string probabilityEngine(string category, int spacesFree);
