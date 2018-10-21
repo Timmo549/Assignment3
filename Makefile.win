@@ -1,8 +1,8 @@
 # Project: CSCI262Assignment3
 # Makefile created by Dev-C++ 5.11
 
-CPP      = g++.exe -std=c++11
-CC       = gcc.exe -std=c++11
+CPP      = g++.exe
+CC       = gcc.exe
 WINDRES  = windres.exe
 OBJ      = Traffic.o Stats.o Vehicle.o ActivityStats.o
 LINKOBJ  = Traffic.o Stats.o Vehicle.o ActivityStats.o

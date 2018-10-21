@@ -17,11 +17,11 @@ using namespace std;
 
 char *statsFile;
 char *vehiclesFile;
+ofstream fout("logFile.txt");
 
 map<string, Stats> stats; // Vehcile Type Stats
 vector<ActivityStats> activityStats; // Individual Vehicle Stats for simulation
 vector<Vehicle> vehicles; // Vehicle Types
-vector<map<string, Stats>> dayStats; //stats every day
 
 int Stats::numVehicleTypes; //total number of types of vehicles
 int Stats::roadLength; //length of road
@@ -47,10 +47,13 @@ main(int argc, char* argv[]) {
 	
 		int dayCount = 1; //current day 
 		
-		ofstream fout("logFile.txt");
+
 		//Output to log file the initial stats
 		fout << "ActivityEngine..." << endl;
 		cout << "Activity Engine Started..." << endl << endl;
+		
+		vector<map<string, Stats>> dayStats; //stats every day
+		vector<vector<ActivityStats>> dayActivityStats; //stats every day				
 		
 		//start simulation
 		while(dayCount <= days){ //while simulation isn't complete
@@ -88,15 +91,14 @@ main(int argc, char* argv[]) {
 				(*current).second.numMean = ((*current).second.numVehicles); /// dayCount); // rolling average number of vehicles
 				(*current).second.speedMean = ((*current).second.totalSpeed); /// dayCount); // rolling average speed of vehicles	
 				
-				fout << (*current).second.type << ":" << (*current).second.numMean << ":" 
-					 << (*current).second.numStandardDev << ":" << (*current).second.speedMean << ":" 
-					 << (*current).second.speedStandardDev << endl;
+				fout << (*current).second.type << ": No. of Vehicles = " << (*current).second.numMean 
+					 << ", Average Speed = " << (*current).second.speedMean << ";" << endl;
 				fout.flush();
 							
 				current++;				
 			}
 			dayStats.push_back(map<string, Stats> (calcStats));
-	
+			dayActivityStats.push_back(vector<ActivityStats>(activityStats));
 			fout << endl;
 			
 			activityStats.clear();
@@ -105,7 +107,7 @@ main(int argc, char* argv[]) {
 			dayCount++; //increment to the next day
 		}	
 	    cout << "Analysis Engine Started..." << endl << endl;		
-	    analysisEngine(days);
+	    analysisEngine(dayStats, dayActivityStats, days);
 	    cout << "Analysis Engine Finished..." << endl << endl;
 	    fout << endl << endl << endl;
 	    fout.close();
@@ -440,17 +442,16 @@ bool isTrue(char c) { //test whether char is true or false
 	}	
 }
 
-void analysisEngine(int days){
+void analysisEngine(vector<map<string, Stats>> dayStats
+				  , vector<vector<ActivityStats>> dayActivityStats, int days){
 
 ofstream statsOut("BaseStats.txt");
 
 //	vector<ActivityStats> breachedVehicles ();
 	
 vector<map<string, Stats>>::iterator itr = dayStats.begin();	
-//vector<vector<ActivityStats>>::iterator itr2 = 
 
-
-//fout << "AnalysisEngine..." << endl;
+fout << "AnalysisEngine..." << endl;
 
 map<string, Stats> calcStats ((*itr));
 
@@ -465,7 +466,6 @@ while (itr != dayStats.end()){
 	map<string, Stats> current = (*itr);
 	map<string, Stats>::iterator iterator = current.begin();
 	while (iterator != current.end()){
-//		(*iterator).second.printStats();
 
 		map<string, Stats>::iterator s = calcStats.find((*iterator).first);
 		if (dayCount == 1){
@@ -486,26 +486,14 @@ while (itr != dayStats.end()){
 		(*v).second.push_back((*iterator).second.totalSpeed);
 		iterator++;	
 	}
-//	cout << endl;
 	itr++;
 }
-
-//cout << endl;
-
-//map<string, vector<double>>::iterator iterator2 = numStats.begin();
-//while(iterator2 != numStats.end()){
-//	for (int i = 0; i < days; i++){
-//		cout << (*iterator2).first << " " << (*iterator2).second[i] << endl;		
-//	}
-//	iterator2++;
-//}
 
 map<string, Stats>::iterator iterator = calcStats.begin();
 statsOut << Stats::numVehicleTypes << ' ' << Stats::roadLength << ' ' 
 		 << Stats::speedLimit << ' ' << Stats::numParkingSpaces << endl;
 
 while (iterator != calcStats.end()){
-	//	(*iterator).second.printStats();
 	(*iterator).second.numStandardDev = stdDeviation((*numStats.find((*iterator).first)).second, days);
 	(*iterator).second.speedStandardDev = stdDeviation((*speedStats.find((*iterator).first)).second, days);	
 		
@@ -514,7 +502,30 @@ while (iterator != calcStats.end()){
 			 << (*iterator).second.speedStandardDev << endl;
 	statsOut.flush();	
 	iterator++;
-}					
+}		
+
+fout << "\tVehicles That Violated Speed Limit" << endl;
+for (int i = 0; i < days; i++){
+	fout << "Day " << (i+1) << ":" << endl;	
+	vector<vector<ActivityStats>>::iterator itr = dayActivityStats.begin();
+	while (itr != dayActivityStats.end()){
+		vector<ActivityStats>::iterator current = (*itr).begin();
+		while (current != (*itr).end()){
+//			cout << (*current).exitTime << endl;
+			if ( (*current).distanceTravelled >= (Stats::roadLength*1000) ){
+				double speed = calAvgSpeed(((*current).exitTime-(*current).arrivalTime), Stats::roadLength);
+				if ( speed >= Stats::speedLimit ){
+					statsOut << (*current).type << " was caught going " << speed << " Km/H" << endl;					
+				}
+			}
+			current++;
+		}
+		itr++;
+	}
+	// CHECK, BUT IT THINK IS DONE...			
+}
+
+
 
 statsOut.close();
 }
@@ -544,8 +555,6 @@ double stdDeviation(vector<double> data, int days){
     for(int i = 0; i < days; i++){
         sum2+=data[i];
     }
-    //cout << "Sample Standard Deviation: " <<(sqrt(sum2/numVehicles-1)) << endl;
-    //cout << "Population Standard Deviation: " <<(sqrt(sum2/(numVehicles))) << endl
     return sqrt(sum2/days); //return sample standard deviation
 }
 
@@ -663,5 +672,3 @@ bool initStats() {
 	fin.close();	
 	return true;	
 }
-
-

@@ -1,5 +1,7 @@
 #include "Vehicle.h"
+#include "Stats.h"
 #include "ActivityStats.h"
+
 
 using namespace std;
 
@@ -26,5 +28,5 @@ double stdDeviation(vector<double> data, int days);
 double mean(double sum, int numVehicles);
 bool noVehiclesParkFlag();
 
-void analysisEngine(int days);
+void analysisEngine(vector<map<string, Stats>> dayStats, vector<vector<ActivityStats>> dayActivityStats, int days);
 string probabilityEngine(string category, int spacesFree);

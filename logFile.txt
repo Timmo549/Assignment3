@@ -1,28 +1,33 @@
 ActivityEngine...
 Day 1: 
-Bus:1:0:0.850737:0
-Elephant:2:1:0.34776:10
-Emergency:1:0:0.907407:0
-Motorbike:11:3:9.10381:5
-Red car:16:0:10.8069:0
-Taxi:3:2:2.65417:7
+Bus: No. of Vehicles = 2, Average Speed = 1.22795;
+Elephant: No. of Vehicles = 3, Average Speed = 0.312117;
+Emergency: No. of Vehicles = 0, Average Speed = 0;
+Motorbike: No. of Vehicles = 2, Average Speed = 1.63716;
+Red car: No. of Vehicles = 15, Average Speed = 8.70851;
+Taxi: No. of Vehicles = 1, Average Speed = 0.88775;
 
 Day 2: 
-Bus:2:0:1.27753:0
-Elephant:5:1:0.787021:10
-Emergency:1:0:0.940331:0
-Motorbike:10:3:9.05394:5
-Red car:10:0:6.1163:0
-Taxi:4:2:2.8556:7
+Bus: No. of Vehicles = 4, Average Speed = 1.8656;
+Elephant: No. of Vehicles = 1, Average Speed = 0.215444;
+Emergency: No. of Vehicles = 0, Average Speed = 0;
+Motorbike: No. of Vehicles = 14, Average Speed = 12.1798;
+Red car: No. of Vehicles = 17, Average Speed = 12.8195;
+Taxi: No. of Vehicles = 6, Average Speed = 4.91717;
 
 Day 3: 
-Bus:1:0:0.554084:0
-Elephant:2:1:0.31148:10
-Emergency:0:0:0:0
-Motorbike:9:3:7.6069:5
-Red car:17:0:13.5044:0
-Taxi:1:2:0.821071:7
+Bus: No. of Vehicles = 1, Average Speed = 0.586875;
+Elephant: No. of Vehicles = 2, Average Speed = 0.307895;
+Emergency: No. of Vehicles = 0, Average Speed = 0;
+Motorbike: No. of Vehicles = 16, Average Speed = 14.3832;
+Red car: No. of Vehicles = 16, Average Speed = 11.1961;
+Taxi: No. of Vehicles = 6, Average Speed = 4.52457;
 
+AnalysisEngine...
+	Vehicles That Violated Speed Limit
+Day 1:
+Day 2:
+Day 3:
 
 
 
