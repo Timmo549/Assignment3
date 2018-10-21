@@ -13,16 +13,18 @@ double calAvgSpeed(double time, double distance);
 Vehicle shuffleVehicleType();
 
 //events
-void createArrival(int arrival);
+void createArrival(string type,int arrival);
 void departSideRoad(int currTime);
 void departEndRoad(ActivityStats &stats, int currTime);
-void parked(int &spacesFree);
+void parked(string category, int &spacesFree);
 void moves(int currTime);
 
-double setSpeed(); 
+double setSpeed(string type); 
 int randomInt(auto uniform);
 bool isTrue(char c); //check if char is true or false
+double stdDeviation(double data[], int numVehicles);
+double mean(double sum, int numVehicles);
+bool noVehiclesParkFlag();
 
 void analysisEngine();
-double mean(double sum, int numVehicles);
-double stdDeviation(double data[], int numVehicles);
+string probabilityEngine(string category, int spacesFree);

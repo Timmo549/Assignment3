@@ -6,7 +6,7 @@
 #include <map>
 #include <algorithm>
 #include <chrono>
-#include <math>
+#include <cmath>
 
 #include "traffic.h"
 #include "vehicle.h"
@@ -20,15 +20,10 @@ using namespace std;
 char *statsFile;
 char *vehiclesFile;
 
-ofstream fout ("logFile.txt");
-
 map<string, Stats> stats; // Vehcile Type Stats
-vector<ActivityStats> activityStats; // Individual Vehicle Stats 
+vector<ActivityStats> activityStats; // Individual Vehicle Stats for simulation
 vector<Vehicle> vehicles; // Vehicle Types
-
-vector<map<string, Stats>> dayStats;
-
-int numVehicleTypes;
+vector<map<string, Stats>> dayStats; //stats every day
 
 int Stats::numVehicleTypes; //total number of types of vehicles
 int Stats::roadLength; //length of road
@@ -51,27 +46,18 @@ main(int argc, char* argv[]) {
 		initialize(); //initialise program and check for problems reading files
 		
 		double totalVehicles; //total mean number of vehicles through entire simulation
-/*		for (map<string, Stats>::iterator itr = stats.begin(); itr != stats.end(); itr++) { //get total mean vehicles for simulation
-			totalVehicles += (*itr).second.numMean;
-		} */
-		
-/*		for (map<string, Stats>::iterator itr = stats.begin(); itr != stats.end(); itr++) { //set the average vehices each day for each vehicle type
-			(*itr).second.avgVehiclePerDay = (*itr).second.numMean/totalVehicles;
-		}*/		
+	
 		int dayCount = 1; //current day 
 		
+		ofstream fout("logFile.txt");
 		//Output to log file the initial stats
 		fout << "ActivityEngine..." << endl;
-		fout << Stats::numVehicleTypes << ':' << Stats::roadLength << ':' << Stats::speedLimit << ':' << Stats::numParkingSpaces << endl << endl;
-
-
-		
 		cout << "Activity Engine Started..." << endl << endl;
 		
 		//start simulation
 		while(dayCount <= days){ //while simulation isn't complete
-
-			static map<string, Stats> calcStats (stats);
+			map<string, Stats> calcStats;
+			calcStats = stats;
 			
 			for (map<string, Stats>::iterator itr = calcStats.begin(); itr != calcStats.end(); itr++){
 				(*itr).second.numMean = 0;
@@ -82,7 +68,7 @@ main(int argc, char* argv[]) {
 				(*itr).second.totalSpeed = 0;				
 				itr++;	
 			}
-
+			
 			activityEngine(dayCount, Stats::numParkingSpaces); //simulate current day
 			
 			fout << "Day " << dayCount << ": " << endl;
@@ -95,82 +81,55 @@ main(int argc, char* argv[]) {
 					(*current).second.numVehicles++;
 //					cout << "AVG speed: " << (*itr).speedMean << endl;
 					(*current).second.totalSpeed += (*itr).speedMean;
-//					cout << "Mean speed: " << (*current).second.totalSpeed << endl;											
-
+//					cout << "Mean speed: " << (*current).second.totalSpeed << endl;									
 					itr++;
 			}
 			
-			current = calcStats.begin();
-
-//			static map<string, Stats> AEStats (calcStats);			
-			
+			current = calcStats.begin();		
 			while (current != calcStats.end()){
-				//cout << (*current).first << endl;
-				// rolling average number of vehicles
-				(*current).second.numMean = ((*current).second.numVehicles / dayCount);
-				
-				// rolling average speed of vehicles
-				(*current).second.speedMean = ((*current).second.totalSpeed / dayCount);
-				
-				//cout << (*current).second.speedMean << "SM TS" << (*current).second.totalSpeed << endl; 
-				
-				//(*current).second.printStats();	
-				//cout << endl;		
+				(*current).second.numMean = ((*current).second.numVehicles); /// dayCount); // rolling average number of vehicles
+				(*current).second.speedMean = ((*current).second.totalSpeed); /// dayCount); // rolling average speed of vehicles	
 				
 				fout << (*current).second.type << ":" << (*current).second.numMean << ":" 
 					 << (*current).second.numStandardDev << ":" << (*current).second.speedMean << ":" 
 					 << (*current).second.speedStandardDev << endl;
 				fout.flush();
-				
-				
-
-				
+							
 				current++;				
 			}
-
 			dayStats.push_back(map<string, Stats> (calcStats));
 	
-			fout  << endl;
+			fout << endl;
 			
 			activityStats.clear();
-			
+		
 			cout << "DAY " << dayCount << " FINISHED" << endl;
-			
 			dayCount++; //increment to the next day
 		}	
-		
-
-		cout << "Analysis Engine Started..." << endl << endl;		
-		
-		analysisEngine();
-
-		cout << "Analysis Engine Finished..." << endl << endl;
+	    cout << "Analysis Engine Started..." << endl << endl;		
+	    analysisEngine();
+	    cout << "Analysis Engine Finished..." << endl << endl;
+	    fout << endl << endl << endl;
+	    fout.close();
 					
 	}
-	
-	fout << endl << endl << endl;
-		
-	fout.close();
 	
 	return 0;
 }
 
 void activityEngine(int dayCount, int spacesFree){
 	int currTime = 0; //time in minutes 0-1440
-
+	
 	cout << "DAY " << dayCount << " STARTED" << endl;	
 	cout << "..." << endl;
 
 	while(currTime < 1440){ //for the entire day, do this
-	
-		if (currTime%60 == 0){
+		if (currTime%60 == 0){ //get the current time
 			cout << endl << "THE TIME IS: " << currTime << endl << endl;			
 		}
-	
-		if(getVehiclesActive() == 1){ //if there are any vehicles active
-			// check whether any vehicle has finished the road
+		if(getVehiclesActive() >= 1){ //if there are any vehicles active
 			vector<ActivityStats>::iterator itr = activityStats.begin();
-			while (itr != activityStats.end()){ //while more vehicles to process
+			while (itr != activityStats.end()){	// check whether any vehicle has finished the road
 				if ((*itr).active && (*itr).parked == false && ((*itr).distanceTravelled) >= (Stats::roadLength * 1000)){ //if past end of road
 					departEndRoad((*itr), currTime);	//depart end road	
 					cout << "- " <<(*itr).type << " DEPARTED" << endl << endl << endl;
@@ -178,85 +137,178 @@ void activityEngine(int dayCount, int spacesFree){
 				}
 				itr++; //increment counter
 			}
-			//moves(currTime);
-			
-			if(currTime >= 1380){ //if it is after 11pm (2300)
-				static uniform_int_distribution<unsigned> uniform (1,3);
 
-				//determine probabilities and "roll the dice for which event"
-				//only 2,3,4,5
-				int action = randomInt(uniform); // random number generated
-//				cout << "A11: " << action << endl;
-				switch(action){ //depending on random number
-					case(1):
-						departSideRoad(currTime);						
-//						cout << "departed via side road" << endl;
-						break;
-					case(2):
-						if (spacesFree <= Stats::numParkingSpaces){
-							parked(spacesFree);						
-						}
-						//void parked() returns false if there are no vehicles to park or stop parking
-						break;
-					case(3):
-						moves(currTime);
-//						cout << "moves" << endl;
-						//void moves() incomplete
-						break;
-				}				
+			if(currTime >= 1380){ //if it is after 11pm (2300)
+				string action = probabilityEngine("_after11", spacesFree);
+				
+				if(action == "_D"){		
+					departSideRoad(currTime); 
+				}
+				else if(action == "_P" || action == "_NP"){
+					parked(action, spacesFree);
+				}
+				else if(action == "_M"){	
+					moves(currTime);
+				}			
 			} 
 			else{
-				static uniform_int_distribution<unsigned> uniform (1,4);
-	
-				//determine probabilities and "roll the dice for which event"
-				//the probabilities should go up and down depending on what should happen
-				//e.g. an arrival should be at a low chance if there the activity system is almost full
-				// 1,2,3,4 
-				int action = randomInt(uniform); // random number generated
-//					cout << "B11: " << action << endl;
-				switch(action){ //depending on random number
-					case(1):
-						createArrival(currTime);
-						break;
-					case(2):
-						departSideRoad(currTime); 
-//							cout << "departed via side road" << endl;
-						break;
-					case(3):
-						if (spacesFree <= Stats::numParkingSpaces){
-							parked(spacesFree);
-						}
-						//void parked() returns false if there are no vehicles to park or stop parking
-						break;
-					case(4):
-						moves(currTime);
-//							cout << "moves" << endl;
-						//void moves() incomplete
-						break;												
+				string action = probabilityEngine("_before11", spacesFree);
+				
+				if(action.substr(0,2) == "_C"){
+					createArrival(action.substr(2,action.length()),currTime);
+				}
+				else if(action == "_D"){		
+					departSideRoad(currTime); 
+				}
+				else if(action == "_P" || action == "_NP"){
+					parked(action, spacesFree);
+				}
+				else if(action == "_M"){	
+					moves(currTime);
 				}
 			}
-		} 
+		}
 		else{
 			if (currTime <= 1380) {
-				static uniform_int_distribution<unsigned> uniform (1,2);
-				int random = randomInt(uniform); // random number generated
+				string type = probabilityEngine("_onlyArrive", spacesFree);
 				
-				//determine probability(event happens or not. 1 or nothing 50/50 chance)
-				if (random == 1){
-					createArrival(currTime);
+				if (type != "_noEvent"){
+					createArrival(type,currTime);
 				}
 			}
 		}
 		currTime++;
 	}
-	
-	
 }
 
-void createArrival(int arrivalTime){ //event 1, add vehicle into system
-	string random = shuffleVehicleType().name;
+string probabilityEngine(string category, int spacesFree){
+	string rCreate = "", rPark = "", rSide = "", rMove = "";
+	
+	//Arrival, determine probability of which type of vehicle
+	double vehicleTypeOdds[Stats::numVehicleTypes]; //odds of each different type of vehicle entering system
+	int counter = 0; //iterate through array
+	double prev = 0; //add up all previous percentages
+	double closest = 100; //determines which event that will be chosen
+	
+	static uniform_int_distribution<signed> uniform (0,100); //number between 0 and 100 
+	double randomVehicle = double (randomInt(uniform))/100; //determine random percentage given number 0-100
+	
+	string current = ""; //keep track of the 
+	double totalMean = 0; //add up how many vehicle there should be per day
+	map<string, Stats>::iterator itr = stats.begin();
+	while(itr != stats.end()){ //add up how many vehicle there should be per day
+		totalMean += (*itr).second.numMean;
+		itr++;
+	}
+	
+	map<string, Stats>::iterator iterator = stats.begin();
+	while(iterator != stats.end()){
+		vehicleTypeOdds[counter] = ((*iterator).second.numMean/totalMean) + prev;
+		prev += (*iterator).second.numMean/totalMean;
+		if((closest > (vehicleTypeOdds[counter] - randomVehicle)) && (vehicleTypeOdds[counter] - randomVehicle) >= 0){ //determine whether this type of vehicle is closest to random number generated
+			closest = vehicleTypeOdds[counter] - randomVehicle;
+			current = (*iterator).first;
+		}
+		counter++;
+		iterator++;
+	}		
+	
+	
+	//Creation of arrival event
+	if(category == "_onlyArrive"){
+		double randomArrival = double (randomInt(uniform))/100; //determine random percentage
+		if(randomArrival <= double(totalMean)/1440){
+			return current;
+		}
+		else{
+			return "_noEvent";
+		}
+	}
+	
+	//parks/stops parking
+	vector<Vehicle>::iterator it = vehicles.begin(); // Vehicle Types
+	int parkable = 0;
+	while(it != vehicles.end()){ //determine how many types of vehicles are able to park
+	    if((*it).parkFlag){
+	    	parkable++;
+		}
+		it++;
+	}
+	double park = double(parkable)/Stats::numVehicleTypes;
+    park = double(park*0.20); //20% of the time, a vehicle that is allowed to park, parks.
+    
+    //Determine whether to park or stop parking a vehicle
+    if(spacesFree == 0){ //if there are no parking spaces free
+    	rPark = "_NP";
+	}
+	else if(Stats::numParkingSpaces == spacesFree){ //if there are all parking spaces free
+		rPark = "_P";
+	}
+	else if (randomVehicle >= 0.5){ //50% chance to park or not 
+		rPark = "_NP";
+	}
+	else{
+		rPark = "_P";
+	}
+    
+    double createEvent = double(totalMean)/1440 + park; //chance to create an event
 
-	ActivityStats v(random, arrivalTime, setSpeed()); //create new activity
+    double departSide = 0.02 + createEvent; //2% of the time a vehicle wants to depart via side road
+
+	double random = double (randomInt(uniform))/100; //determine random percentage
+	
+	double min = 101; //used to determine what event should be chosen(is a percentage)
+	
+	if(category == "_after11"){ //if it is after 11pm, there should be no chance of a vehicle entering
+    	createEvent = -1;
+    }
+    
+    if(noVehiclesParkFlag() && rPark == "_P"){ //if there are no vehicles available to be parked, then parking isn't an option
+    	park = -1;
+	}
+	
+	string state = ""; //event that will be returned
+ 
+    //check to see what event should happen accoding to the percentages
+    if((min > createEvent-random) && createEvent >= random){
+		min = createEvent-random;
+		state = "_C" + current; //set state = create event and also concantenate the type of vehicle
+	}
+    if((min > park-random) && park >= random ){ 
+        min = park-random;
+        state = rPark;
+	}
+	if((min > departSide-random) && departSide >= random){
+		min = departSide-random;
+		state = "_D";
+	}
+	if(min == 101){
+		state = "_M";
+	}
+	
+	return state;
+}
+
+bool noVehiclesParkFlag(){ //if there are no vehicles available to be parked, then parking isn't an option
+	vector<Vehicle>::iterator it = vehicles.begin(); // Vehicle Types
+	
+	while(it != vehicles.end()){
+	    vector<ActivityStats>::iterator itr = activityStats.begin();
+	    map<string, Stats>::iterator current;
+						
+     	while (itr != activityStats.end()){
+			if((*itr).active && (*it).name == (*itr).type && (*it).parkFlag == true &&  !(*itr).parked){
+				return false;
+			}					
+			itr++;
+		}   
+		it++;
+	}
+	return true;
+}
+
+void createArrival(string type, int arrivalTime){ //event 1, add vehicle into system
+	ActivityStats v(type, arrivalTime, setSpeed(type)); //create new activity
 	cout << "+ " << v.type << " Created -- Arrival Speed: "<< v.speed << endl;
 	activityStats.push_back(v); //insert into all activities
 }
@@ -268,8 +320,8 @@ void departSideRoad(int currTime){ //event 2, vehicle departs from side road
 	while (!found && itr != activityStats.end()){
 		if ((*itr).active && (*itr).distanceTravelled > 0 && (*itr).parked == false) {
 			(*itr).exitTime = currTime;
-	//cout << (*itr).distanceTravelled/1000 << " " << ((*itr).exitTime-(*itr).arrivalTime)/60 << endl;
-	//cout << "AVERAGE::: " << double ((*itr).distanceTravelled/1000) / int (((*itr).exitTime-(*itr).arrivalTime)/60)	<< endl;		
+			//cout << (*itr).distanceTravelled/1000 << " " << ((*itr).exitTime-(*itr).arrivalTime)/60 << endl;
+			//cout << "AVERAGE::: " << double ((*itr).distanceTravelled/1000) / int (((*itr).exitTime-(*itr).arrivalTime)/60)	<< endl;		
 			(*itr).speedMean = calAvgSpeed( int ((*itr).exitTime-(*itr).arrivalTime), double ((*itr).distanceTravelled/1000));
 			(*itr).active = false;					
 			cout << "- " << (*itr).type << " DEPARTED VIA SIDE ROAD" << endl << endl << endl;
@@ -277,26 +329,17 @@ void departSideRoad(int currTime){ //event 2, vehicle departs from side road
 		}
 		itr++;
 	}
-
-
-	//incomplete possibly idk
 }
 
 void departEndRoad(ActivityStats &stats, int currTime){ //event 3, vehicle departs from end of road
-	//incomplete possibly idk
-	
 	stats.exitTime = currTime;
-//	cout << "departed end road" << endl;
-	stats.speedMean = calAvgSpeed((stats.exitTime-stats.arrivalTime), Stats::roadLength);
-	// add speedMean to rolling average for Vehicle Type Stats
+	stats.speedMean = calAvgSpeed((stats.exitTime-stats.arrivalTime), Stats::roadLength); // add speedMean to rolling average for Vehicle Type Stats
 }
 
-void parked(int &spacesFree){ //event 4, vehicle parks or stops parking
+void parked(string category, int &spacesFree){ //event 4, vehicle parks or stops parking
 	bool found = false; //used to determine if there is an activity that can be parked
-	
 	while(!found){ //while there is an activity that needs to be parked
 		Vehicle randomType = shuffleVehicleType(); //vehicle chosen at random that is able to park
-		
 		while (1){
 			if ((randomType.parkFlag)){
 				break;
@@ -308,81 +351,190 @@ void parked(int &spacesFree){ //event 4, vehicle parks or stops parking
 		vector<ActivityStats>::iterator itr = activityStats.begin();
 		
 		while (itr != activityStats.end()) { 
-			if( (*itr).active && (*itr).type == randomType.name && (*itr).parked == true){ //if vehicle is of same type and is parked
-			 	(*itr).parked = false;
-			 	spacesFree++;
-			 	found = true;
-			 	break;
-			}  
-			else if( (*itr).active && (*itr).type == randomType.name && (*itr).parked == false){ //if vehicle is of same type and is not parked
+			//cout << "Type 1: " << (*itr).type << "type 2: " << randomType.name << endl;
+			if((*itr).active && (*itr).type == randomType.name && !(*itr).parked && category == "_P"){ //if vehicle is of same type and is not parked
 				(*itr).parked = true;
 				spacesFree--;
 				found = true;
 			 	break;
 			}
-			itr++;
+			else if((*itr).active && (*itr).type == randomType.name && (*itr).parked && category == "_NP"){ //if vehicle is of same type and is parked
+				(*itr).parked = false;
+			 	spacesFree++;
+			 	found = true;
+			 	break; 
+			}
+		itr++;
 		}
-		
-		found = true;
 	}
 }
 
 void moves(int currTime){ //event 5, vehicle moves and may change speed
-	//incomplete
 	string randomType = shuffleVehicleType().name; //vehicle chosen at random that is able to park
 	
 	//search through activities to find a vehicle of same type AND check to see if they are parked or not
 	vector<ActivityStats>::iterator itr = activityStats.begin();	
 	while (itr != activityStats.end()) { 
 		if( (*itr).active && (*itr).type == randomType && (*itr).parked == false){ //if vehicle is of same type and is parked					   
-			(*itr).distanceTravelled += (((*itr).speed/3.6)
-									   * double (currTime-(*itr).movedTime)); 
-	
-//				cout << "Metres2: "<< (*itr).distanceTravelled << endl;						   
-									   
-			//recalculate distance travelled
+			(*itr).distanceTravelled += (((*itr).speed/3.6)* double (currTime-(*itr).movedTime)); 
 			(*itr).movedTime = currTime; // set time moved to current time
-//			 	cout << "Time moved:" << (*itr).movedTime << endl;
-			
-			
-			
-			//speed changed +-10%
-			static uniform_int_distribution<signed> uniform (-10,10);	
+			//cout << "Metres2: "<< (*itr).distanceTravelled << endl;						 
+			//cout << "Time moved:" << (*itr).movedTime << endl;
+		
+			static uniform_int_distribution<signed> uniform (-10,10);	//speed changed +-10%
 			double random = double (randomInt(uniform))/100; //random number between -10 and +10
-			
-//			cout << "RANDOM IS: " << random << endl;
-			
 			(*itr).speed *= (1.0 + random);	
-			
 			return;
 		}
 		itr++;
 	}
 }
 
-double setSpeed(){
-	static uniform_int_distribution<unsigned> uniform (Stats::speedLimit/2, Stats::speedLimit);
-	//speed changed +-15%
-	int random = randomInt(uniform); //random number between -15 and +15
-	double avgSpeed = random;
-	return avgSpeed;
+double setSpeed(string type){//set the speed for a particular type of vehicle
+    double speedMean;
+
+    map<string, Stats>::iterator it = stats.begin(); // Vehicle Types
+    while(it != stats.end()){
+    	if((*it).first == type){
+    		speedMean= (*it).second.speedMean;
+    		break;
+		}
+    	it++;
+	}
+	
+	static uniform_int_distribution<signed> uniform (-10,10);	//speed changed +-10%
+	double random = double (randomInt(uniform))/100; //random number between -10 and +10
+	speedMean *= (1.0 + random);
+	return speedMean;
 }
 
 int getVehiclesActive(){ //get the number of vehciles active in the system
-//	int count = 0;
+	int count = 0;
 	for (vector<ActivityStats>::iterator itr = activityStats.begin(); itr != activityStats.end(); itr++) { //iteratre through
-		 //if((*itr).arrivalTime > -1 && (*itr).exitTime == 0){
-		 if ((*itr).active) {
-		 	//count++;
-		 	return 1;
-		 }  
+		if((*itr).arrivalTime > -1 && (*itr).exitTime == 0){
+		    if ((*itr).active) {
+		 	count++;
+		   }  
+	    }
 	}
-	return 0;
-//	return count;
+	return count;
+}
+
+double calAvgSpeed(double time, double distance){ //average speed
+	return (((distance)/ double (time/60)));
+}
+
+Vehicle shuffleVehicleType(){ //get random type of vehicle
+	static uniform_int_distribution<unsigned> uniform (0, Stats::numVehicleTypes-1);
+	return vehicles[randomInt(uniform)];
+}
+
+int randomInt(auto uniform){ // generates random number based on range/distribution input
+	static default_random_engine randEng(chrono::system_clock::now().time_since_epoch().count());
+	return uniform(randEng);
+}
+
+bool isTrue(char c) { //test whether char is true or false
+	if (c == '1') { //if 1 then true
+		return true;
+	} else {
+		return false;
+	}	
+}
+
+void analysisEngine(){
+
+ofstream statsOut("BaseStats.txt");
+
+//	vector<ActivityStats> breachedVehicles ();
+	
+vector<map<string, Stats>>::iterator itr = dayStats.begin();	
+//vector<vector<ActivityStats>>::iterator itr2 = 
+
+
+//fout << "AnalysisEngine..." << endl;
+
+map<string, Stats> calcStats ((*itr));
+
+int dayCount = 0;
+
+while (itr != dayStats.end()){
+	dayCount++;
+	map<string, Stats> current = (*itr);
+	map<string, Stats>::iterator iterator = current.begin();
+	while (iterator != current.end()){
+//		(*iterator).second.printStats();
+	map<string, Stats>::iterator s = calcStats.find((*iterator).first);
+
+		// rolling average number of vehicles
+		(*s).second.numMean = (((*s).second.numMean * (dayCount - 1)) 
+							+ (*iterator).second.numVehicles) / dayCount;
+//			cout << (*iterator).first << " NM: " << (*s).second.numMean << endl;		
+		// rolling average speed of vehicles
+		(*s).second.speedMean = (((*s).second.speedMean * (dayCount - 1)) 
+							  + (*iterator).second.totalSpeed) / dayCount;
+//			cout << "SM: " << (*s).second.speedMean << endl;			
+	
+		iterator++;	
+	}
+//	cout << endl;
+	itr++;
+}
+
+//cout << endl;
+
+map<string, Stats>::iterator iterator = calcStats.begin();
+statsOut << Stats::numVehicleTypes << ' ' << Stats::roadLength << ' ' 
+		 << Stats::speedLimit << ' ' << Stats::numParkingSpaces << endl;
+
+while (iterator != calcStats.end()){
+	//	(*iterator).second.printStats();
+		
+//		(*iterator).numStandardDev = stdDeviation();
+//		(*iterator).speedStandardDev = stdDeviation();	
+		
+		statsOut << (*iterator).second.type << ":" << (*iterator).second.numMean << ":" 
+			 << (*iterator).second.numStandardDev << ":" << (*iterator).second.speedMean << ":" 
+			 << (*iterator).second.speedStandardDev << endl;
+		statsOut.flush();	
+		iterator++;
+}					
+
+statsOut.close();
+}
+
+double mean(double sum, int numVehicles){
+    return sum/numVehicles;
+}
+
+double stdDeviation(double data[], int numVehicles){
+    double Sum = 0;
+
+//    for(int i = 0; i < data.size(); i++){
+ //       Sum += data[i];
+ //   }
+
+    double mean = Sum/(numVehicles); //length = total amount
+
+    double temp = 0;
+
+    for(int i = 0; i < numVehicles; i++){
+        temp = data[i] - mean;
+        data[i] = pow(temp,2);
+    }
+
+    double sum2 = 0;
+
+    for(int i = 0; i < numVehicles; i++){
+        sum2+=data[i];
+    }
+    //cout << "Sample Standard Deviation: " <<(sqrt(sum2/length)) << endl;
+    //cout << "Population Standard Deviation: " <<(sqrt(sum2/(length-1))) << endl
+    return sqrt(sum2/numVehicles);
 }
 
 void initialize () { //initialise program
-	if (!initVehicles() || !initStats()) { //initliase the vehicles and stats and determine whether there was an error
+	if (!initStats() || !initVehicles() ) { //initliase the vehicles and stats and determine whether there was an error
 		cerr << "Error whilst initializing" << endl;
 		exit (3);
 	}
@@ -418,8 +570,15 @@ bool initVehicles() { //initialise vehicles
 	char regFormat[10]; //registration(number plate)
 	int volWeight; //volume weight
 	int speedWeight; //speed weight
-
+	
+    int numVehicleTypes;
 	fin >> numVehicleTypes; //get number of vehicle types from file
+	
+	if(numVehicleTypes != Stats::numVehicleTypes){
+		cout << "Error, number of vehicle types differ in stats.txt and vehicle.txt. " << endl;
+		return false;
+	}
+	
 	cout << "Number Of Vehicles Read In: " << numVehicleTypes << endl << endl;
 	fin.ignore(256, '\n'); //ignore \n to use getline
 	
@@ -489,122 +648,4 @@ bool initStats() {
 	return true;	
 }
 
-double calAvgSpeed(double time, double distance){ //average speed
-//	cout << (distance) << " " << (time/60) << endl;
-	return (((distance)/ double (time/60)));
-}
 
-Vehicle shuffleVehicleType(){
-	static uniform_int_distribution<unsigned> uniform (0, Stats::numVehicleTypes-1);
-	return vehicles[randomInt(uniform)];
-}
-
-int randomInt(auto uniform){ // generates random number based on range/distribution input
-	static default_random_engine randEng(chrono::system_clock::now().time_since_epoch().count());
-	return uniform(randEng);
-}
-
-bool isTrue(char c) { //test whether char is true or false
-	if (c == '1') { //if 1 then true
-		return true;
-	} else {
-		return false;
-	}	
-}
-
-void analysisEngine(){
-
-ofstream statsOut("BaseStats.txt");
-
-//	vector<ActivityStats> breachedVehicles ();
-	
-vector<map<string, Stats>>::iterator itr = dayStats.begin();	
-//vector<vector<ActivityStats>>::iterator itr2 = 
-
-double numMean = 0;
-double speedMean = 0;
-
-while (itr != dayStats.end()){
-	map<string, Stats> current = (*itr);
-	map<string, Stats>::iterator iterator = current.begin();
-	while (iterator != current.end()){
-//		(*iterator).second.printStats();
-
-
-		// rolling average number of vehicles
-		numMean = ((numMean * (dayCount - 1)) + numVehicles) / dayCount;
-					
-		// rolling average speed of vehicles
-		speedMean = ((speedMean * (dayCount - 1)) + (*current).second.totalSpeed) / dayCount;
-	
-		iterator++;	
-	}
-	itr++;
-}
-
-		fout << (*iterator).second.type << ":" << (*iterator).second.numMean << ":" 
-			 << (*iterator).second.numStandardDev << ":" << (*iterator).second.speedMean << ":" 
-			 << (*iterator).second.speedStandardDev << endl;
-		fout.flush();
-						
-/*						
-			vector<ActivityStats>::iterator itr = activityStats.begin();
-			map<string, Stats>::iterator current;
-						
-			while (itr != activityStats.end() && !(*itr).active){
-					current = calcStats.find((*itr).type);				
-					(*current).second.numVehicles++;
-					(*current).second.totalSpeed += (*itr).speedMean;										
-
-					itr++;
-			}
-			
-			current = calcStats.begin();			
-			
-			while (current != calcStats.end()){
-
-				(*current).second.numMean = ((*current).second.numVehicles / dayCount);
-				
-				(*current).second.speedMean = ((*current).second.totalSpeed / dayCount);
-				
-				fout << (*current).second.type << ":" << (*current).second.numMean << ":" 
-					 << (*current).second.numStandardDev << ":" << (*current).second.speedMean << ":" 
-					 << (*current).second.speedStandardDev << endl;
-				fout.flush();
-
-				current++;				
-			}						
-*/						
-
-statsOut.close();
-}
-
-double mean(double sum, int numVehicles){
-    return sum/numVehicles;
-}
-
-double stdDeviation(double data[], int numVehicles){
-    double Sum = 0;
-
-    for(int i = 0; i < length; i++){
-        Sum += data[i];
-    }
-
-    double mean = Sum/(numVehicles); //length = total amount
-
-    double temp = 0;
-
-    for(int i = 0; i < numVehicles; i++){
-        temp = data[i] - mean;
-        data[i] = pow(temp,2);
-    }
-
-    double sum2 = 0;
-
-    for(int i = 0; i < numVehicles; i++){
-        sum2+=data[i];
-    }
-    //cout << "Sample Standard Deviation: " <<(sqrt(sum2/length)) << endl;
-    //cout << "Population Standard Deviation: " <<(sqrt(sum2/(length-1))) << endl
-    return sqrt(sum2/numVehicles);
-}
