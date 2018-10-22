@@ -2,7 +2,6 @@
 #include "Stats.h"
 #include "ActivityStats.h"
 
-
 using namespace std;
 
 //Initialization
@@ -25,7 +24,7 @@ void analysisEngine(vector<map<string, Stats>> dayStats, vector<vector<ActivityS
 
 //RandomGenerators
 Vehicle shuffleVehicleType(); //get random type of vehicle
-int randomInt(auto uniform); // generates random number based on range/distribution input
+int randomInt(uniform_int_distribution<signed int> uniform); // generates random number based on range/distribution input
 
 //Calculation Functions
 double setSpeed(string type); //set the speed for a particular type of vehicle only when they arrive
@@ -36,6 +35,7 @@ double calAvgSpeed(double time, double distance); //calculate average speed
 int getVehiclesActive(); //get number of vehicles active
 bool noVehiclesParkFlag(); //if there are no vehicles available to be parked, then parking isn't an option
 bool isTrue(char c); //check if char is true or false
+
 
 
 

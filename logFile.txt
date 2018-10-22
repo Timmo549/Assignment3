@@ -1,36 +1,35 @@
 ActivityEngine...
 Day 1: 
-Bus: No. of Vehicles = 3, Average Speed = 35.3206;
-Elephant: No. of Vehicles = 4, Average Speed = 9.58205;
-Emergency: No. of Vehicles = 0, Average Speed = nan;
-Motorbike: No. of Vehicles = 13, Average Speed = 46.3734;
-Red car: No. of Vehicles = 33, Average Speed = 41.8516;
-Taxi: No. of Vehicles = 4, Average Speed = 45.02;
+Bus: No. of Vehicles = 5, Average Speed = 32.2473;
+Elephant: No. of Vehicles = 2, Average Speed = 4.55672;
+Emergency: No. of Vehicles = 1, Average Speed = 51.8748;
+Motorbike: No. of Vehicles = 25, Average Speed = 49.9864;
+Red car: No. of Vehicles = 40, Average Speed = 43.94;
+Taxi: No. of Vehicles = 7, Average Speed = 48.4803;
 
 Day 2: 
-Bus: No. of Vehicles = 2, Average Speed = 39.8377;
-Elephant: No. of Vehicles = 1, Average Speed = 9.51579;
-Emergency: No. of Vehicles = 1, Average Speed = 51.005;
-Motorbike: No. of Vehicles = 23, Average Speed = 46.6406;
-Red car: No. of Vehicles = 20, Average Speed = 46.5534;
-Taxi: No. of Vehicles = 7, Average Speed = 36.2434;
+Bus: No. of Vehicles = 8, Average Speed = 34.2771;
+Elephant: No. of Vehicles = 0, Average Speed = nan;
+Emergency: No. of Vehicles = 1, Average Speed = 54.6851;
+Motorbike: No. of Vehicles = 17, Average Speed = 48.8784;
+Red car: No. of Vehicles = 32, Average Speed = 43.2838;
+Taxi: No. of Vehicles = 7, Average Speed = 47.969;
 
 Day 3: 
-Bus: No. of Vehicles = 14, Average Speed = 36.0264;
-Elephant: No. of Vehicles = 4, Average Speed = 8.37506;
-Emergency: No. of Vehicles = 3, Average Speed = 55.5177;
-Motorbike: No. of Vehicles = 20, Average Speed = 48.5122;
-Red car: No. of Vehicles = 23, Average Speed = 44.5233;
-Taxi: No. of Vehicles = 5, Average Speed = 38.4777;
+Bus: No. of Vehicles = 6, Average Speed = 38.3381;
+Elephant: No. of Vehicles = 3, Average Speed = 8.8582;
+Emergency: No. of Vehicles = 2, Average Speed = 48.6814;
+Motorbike: No. of Vehicles = 18, Average Speed = 45.3688;
+Red car: No. of Vehicles = 23, Average Speed = 47.7491;
+Taxi: No. of Vehicles = 4, Average Speed = 31.3539;
 
 AnalysisEngine...
 	Vehicles That Violated Speed Limit
 Day 1:
-Motorbike was caught going 62.4603km/h in a 60km/h zone
 Day 2:
+Motorbike was caught going 67.2768km/h in a 60km/h zone
 Day 3:
-Red car was caught going 63.9893km/h in a 60km/h zone
-Emergency was caught going 61.44km/h in a 60km/h zone
+Motorbike was caught going 60.0595km/h in a 60km/h zone
 
 
 

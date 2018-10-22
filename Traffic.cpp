@@ -7,10 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include "traffic.h"
-#include "vehicle.h"
-#include "stats.h"
-#include "ActivityStats.h"
+#include "Traffic.h"
 
 using namespace std;
 
@@ -21,6 +18,8 @@ ofstream fout("logFile.txt");
 map<string, Stats> stats; // Vehcile Type Stats
 vector<ActivityStats> activityStats; // Individual Vehicle Stats for simulation
 vector<Vehicle> vehicles; // Vehicle Types
+
+//int numVehicleTypes;
 
 int Stats::numVehicleTypes; //total number of types of vehicles
 int Stats::roadLength; //length of road
@@ -90,7 +89,7 @@ main(int argc, char* argv[]) {
 			current = calcStats.begin(); //keep track of current vehicle
 			while (current != calcStats.end()){
 				(*current).second.numMean = ((*current).second.numVehicles); // rolling average number of vehicles
-				(*current).second.speedMean = ((*current).second.totalSpeed/(*current).second.numVehicles); // rolling average speed of vehicles	
+				(*current).second.speedMean = ((*current).second.totalSpeed)/(*current).second.numVehicles; // rolling average speed of vehicles	
 				
 				//write info to file
 				fout << (*current).second.type << ": No. of Vehicles = " << (*current).second.numMean 
@@ -223,7 +222,6 @@ bool initStats() { //initiliase stats
 		fin >> speedStandardDev;
 		fin.ignore(256, ':');
 		fin.ignore(256, '\n');		
-//		cout << "T-"<< vehicleType << " Added" << endl;
 		
 		stats.insert(pair<string, Stats>(vehicleType, Stats (vehicleType, numMean
 							 , numStandardDev, speedMean, speedStandardDev)));
@@ -307,9 +305,8 @@ void activityEngine(int dayCount, int spacesFree){ //simulation engine
 
 string probabilityEngine(string category, int spacesFree){ //determine probability for an event to occur
 	string rCreate = "", rPark = ""; //stores information in a string of their respective events
-	
 	//Arrival, determine probability of which type of vehicle
-	double vehicleTypeOdds[Stats::numVehicleTypes]; //odds of each different type of vehicle entering system
+	vector<double> vehicleTypeOdds(Stats::numVehicleTypes); //odds of each different type of vehicle entering system
 	int counter = 0; //iterate through array
 	double prev = 0; //add up all previous percentages
 	double closest = 100; //determines which event that will be chosen
@@ -327,7 +324,7 @@ string probabilityEngine(string category, int spacesFree){ //determine probabili
 	
 	map<string, Stats>::iterator iterator = stats.begin();
 	while(iterator != stats.end()){ //iterate through all vehicles and determine statistics for each type of vehicle.
-		vehicleTypeOdds[counter] = ((*iterator).second.numMean/totalMean) + prev;
+		vehicleTypeOdds[counter] = (((*iterator).second.numMean/totalMean) + prev);
 		prev += (*iterator).second.numMean/totalMean;
 		if((closest > (vehicleTypeOdds[counter] - randomVehicle)) && (vehicleTypeOdds[counter] - randomVehicle) >= 0){ //determine whether this type of vehicle is closest to random number generated
 			closest = vehicleTypeOdds[counter] - randomVehicle; //if it is, reset the closest variable
@@ -517,19 +514,17 @@ void analysisEngine(vector<map<string, Stats>> dayStats, vector<vector<ActivityS
 			}
 			// rolling average number of vehicles
 			(*s).second.numMean = (((*s).second.numMean * (dayCount - 1)) 
-								+ (*iterator).second.numVehicles) / dayCount;
-			//cout << (*iterator).first << " NM: " << (*s).second.numMean << endl;		
+								+ (*iterator).second.numVehicles) / dayCount;	
 			
 			// rolling average speed of vehicles
 			(*s).second.speedMean = (((*s).second.speedMean * (dayCount - 1)) 
-								  + (*iterator).second.totalSpeed) / dayCount;
-			//cout << "SM: " << (*s).second.speedMean << endl;			
+								  + (*iterator).second.speedMean) / dayCount;		
 			
 			map<string, vector<double>>::iterator v = numStats.find((*s).first); 
 			(*v).second.push_back((*iterator).second.numVehicles);
 			
 			v = speedStats.find((*s).first);
-			(*v).second.push_back((*iterator).second.totalSpeed);
+			(*v).second.push_back((*iterator).second.speedMean);
 			iterator++;	
 		}
 		itr++;
@@ -577,11 +572,11 @@ void analysisEngine(vector<map<string, Stats>> dayStats, vector<vector<ActivityS
 /*-------------------------RandomGenerators-------------------------*/
 
 Vehicle shuffleVehicleType(){ //get random type of vehicle
-	static uniform_int_distribution<unsigned> uniform (0, Stats::numVehicleTypes-1); //get a random number in the range of how many type of vehicles
+	static uniform_int_distribution<signed> uniform (0, Stats::numVehicleTypes-1); //get a random number in the range of how many type of vehicles
 	return vehicles[randomInt(uniform)]; //return random number
 }
 
-int randomInt(auto uniform){ //generates random number based on range/distribution input
+int randomInt(uniform_int_distribution<signed int> uniform){ //generates random number based on range/distribution input
 	static default_random_engine randEng(chrono::system_clock::now().time_since_epoch().count()); //generate seed with number
 	return uniform(randEng); //return random number
 }
@@ -674,6 +669,7 @@ bool isTrue(char c) { //test whether char is true or false
 	 else 
 		return false;	
 }
+
 
 
 
