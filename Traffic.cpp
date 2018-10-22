@@ -250,6 +250,7 @@ bool initStats() { //initiliase stats
 /*-------------------ActivityEngine/ProbabilityEngine-------------------*/
 
 void activityEngine(int dayCount, int spacesFree){ //simulation engine
+	int currTime = 0; //time in minutes 0-1440
 	
 	cout << "DAY " << dayCount << " STARTED" << endl;	
 	cout << "..." << endl;
