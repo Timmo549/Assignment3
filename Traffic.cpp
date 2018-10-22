@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cmath>
 #include "Traffic.h"
+#include <iomanip>
 
 using namespace std;
 
@@ -91,10 +92,22 @@ main(int argc, char* argv[]) {
 				(*current).second.numMean = ((*current).second.numVehicles); // rolling average number of vehicles
 				(*current).second.speedMean = ((*current).second.totalSpeed)/(*current).second.numVehicles; // rolling average speed of vehicles	
 				
-				//write info to file
-				fout << (*current).second.type << ": No. of Vehicles = " << (*current).second.numMean 
-					 << ", Average Speed = " << (*current).second.speedMean << ";" << endl;
-				fout.flush();
+				if((*current).second.numVehicles != 0){
+					//write info to file
+					fout << fixed << setprecision(0);
+					fout << (*current).second.type << ": No. of Vehicles = " << (*current).second.numMean 
+						 << ", Average Speed = " << fixed << setprecision(2) << (*current).second.speedMean << "km/h;" << endl;
+					fout.flush();
+				}
+				else{
+					(*current).second.numMean = 0;
+					(*current).second.speedMean = 0;
+					//write info to file
+					fout << fixed << setprecision(0);
+					fout << (*current).second.type << ": No. of Vehicles = " << (*current).second.numMean 
+						 << ", Average Speed = " << fixed << setprecision(2) << (*current).second.speedMean << "km/h;" << endl;
+					fout.flush();
+				}
 							
 				current++;				
 			}
@@ -237,7 +250,6 @@ bool initStats() { //initiliase stats
 /*-------------------ActivityEngine/ProbabilityEngine-------------------*/
 
 void activityEngine(int dayCount, int spacesFree){ //simulation engine
-	int currTime = 0; //time in minutes 0-1440
 	
 	cout << "DAY " << dayCount << " STARTED" << endl;	
 	cout << "..." << endl;
@@ -517,8 +529,9 @@ void analysisEngine(vector<map<string, Stats>> dayStats, vector<vector<ActivityS
 								+ (*iterator).second.numVehicles) / dayCount;	
 			
 			// rolling average speed of vehicles
+			
 			(*s).second.speedMean = (((*s).second.speedMean * (dayCount - 1)) 
-								  + (*iterator).second.speedMean) / dayCount;		
+								+ (*iterator).second.speedMean) / dayCount;		
 			
 			map<string, vector<double>>::iterator v = numStats.find((*s).first); 
 			(*v).second.push_back((*iterator).second.numVehicles);
@@ -538,6 +551,7 @@ void analysisEngine(vector<map<string, Stats>> dayStats, vector<vector<ActivityS
 		(*iterator).second.numStandardDev = stdDeviation((*numStats.find((*iterator).first)).second, days);
 		(*iterator).second.speedStandardDev = stdDeviation((*speedStats.find((*iterator).first)).second, days);	
 			
+		statsOut << fixed << setprecision(2);
 		statsOut << (*iterator).second.type << ":" << (*iterator).second.numMean << ":" 
 				 << (*iterator).second.numStandardDev << ":" << (*iterator).second.speedMean << ":" 
 				 << (*iterator).second.speedStandardDev << endl;
