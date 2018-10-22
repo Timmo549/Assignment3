@@ -678,4 +678,3 @@ bool isTrue(char c) { //test whether char is true or false
 
 
 
-
